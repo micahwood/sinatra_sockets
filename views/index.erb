@@ -63,6 +63,7 @@
             var value = event.target.textContent;
             ws.send(`vote:${idx}`);
             surveyOptions.innerHTML = `You voted for "${value}"`;
+            setTimeout(() => surveyOptions.innerHTML = '', 3500);
         });
 
     </script>
