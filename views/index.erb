@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <section class="section">
+        <div class="container">
+            <form method="POST">
+                <div class="field">
+                    <label class="label">Question</label>
+                    <div class="control">
+                        <textarea name="question" class="textarea" placeholder="What is your question?" autofocus></textarea>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="control">
+                        <button class="button is-link" type="submit">Ask it</button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="survey is-hidden">
+                <h1 class="title survey-title"></h1>
+                <div class="survey-options"></div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        var surveyContainer = document.querySelector('.survey');
+        var surveyTitle = document.querySelector('.survey-title');
+        var surveyOptions = document.querySelector('.survey-options');
+
+        var ws = new WebSocket('ws://' + window.location.host + window.location.pathname + 'student-socket');
+        ws.onopen = () => { console.log('socket opened') };
+        ws.onclose = () => { console.log('socket closed') };
+        ws.onmessage = (msg) => {
+            console.log(msg);
+            if (msg.data.includes('survey:')) {
+                addSurvey(JSON.parse(msg.data.substring(7)));
+            }
+        }
+
+        function addSurvey(survey) {
+            surveyContainer.classList.remove('is-hidden');
+            surveyTitle.textContent = survey.title;
+            surveyOptions.innerHTML = '';
+            survey.options.forEach((option, idx) => {
+                const node = document.createElement('div');
+                node.innerHTML = `<button class="button" value="${idx}">${option.value}</button>`;
+                surveyOptions.appendChild(node);
+            });
+        }
+
+        surveyContainer.addEventListener('click', (event) => {
+            if (event.target.localName !== 'button') {
+                return;
+            }
+            var idx = event.target.value;
+            var value = event.target.textContent;
+            ws.send(`vote:${idx}`);
+            surveyOptions.innerHTML = `You voted for "${value}"`;
+        });
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin</title>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        .question {
+            white-space: pre;
+        }
+
+        #list {
+            margin-bottom: .75rem;
+        }
+    </style>
+</head>
+<body>
+
+    <section class="section">
+        <div class="container">
+            <h1 class="title">Questions</h1>
+            <hr>
+            <div id="list">
+
+            </div>
+            <div class="field is-grouped">
+                <div class="control">
+                    <button class="button is-link" id="modal">Survey</button>
+                </div>
+                <div class="control">
+                    <button class="button is-text" id="clear">Clear</button>
+                </div>
+            </div>
+
+            <div class="survey-result is-hidden">
+                <h1 class="title">Survey Results</h1>
+                <h3 class="subtitle survey-title"></h3>
+                <div class="options">
+
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <div class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Add a survey</p>
+                <button class="delete" aria-label="close"></button>
+            </header>
+            <section class="modal-card-body">
+                 <div class="field">
+                    <label class="label">Title</label>
+                    <div class="control">
+                        <input name="title" id="surveyTitle" class="input">
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Option 1</label>
+                    <div class="control">
+                        <input name="option1" id="option1" class="input">
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Option 2</label>
+                    <div class="control">
+                        <input name="option2" id="option2" class="input">
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Option 3</label>
+                    <div class="control">
+                        <input name="option1" id="option3" class="input">
+                    </div>
+                </div>
+            </section>
+            <footer class="modal-card-foot">
+                <button class="button is-success" id="publish">Publish</button>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        var questionList = document.getElementById('list');
+        var clearBtn = document.getElementById('clear');
+        var modalBtn = document.getElementById('modal');
+        var publishBtn = document.getElementById('publish');
+        var modal = document.querySelector('.modal');
+        var modalClose = document.querySelector('.modal .delete');
+        var survey = {
+            title: '',
+            options: [],
+        };
+
+        var ws = new WebSocket('ws://' + window.location.host + window.location.pathname + '-socket');
+        var questionId = 1;
+        ws.onopen = () => { console.log('socket opened') };
+        ws.onclose = () => { console.log('socket closed') };
+        ws.onmessage = (msg) => {
+            console.log(msg);
+            if (msg.data.includes('question:')) {
+                addQuestion(msg.data.substring(9));
+            }
+            if (msg.data.includes('vote:')) {
+                countVote(msg.data.substring(5));
+            }
+
+        }
+
+        function addQuestion(msg) {
+            var node = document.createElement('div');
+            node.className = 'box';
+            node.innerHTML = `
+                <div class="columns">
+                    <div class="column is-2"><h2 class="subtitle">${questionId++}</h2></div>
+                    <div class="column question">${msg}</div>
+                </div>
+            `;
+            // var pre = document.createElement('pre');
+            // pre.textContent = msg.substring(9);
+            // node.appendChild(pre);
+            // node.textContent = msg.substring(9);
+            questionList.appendChild(node);
+        }
+
+        clearBtn.addEventListener('click', () => {
+            questionId = 1;
+            questionList.innerHTML = '';
+        });
+        modalBtn.addEventListener('click', () => {
+            modal.classList.add('is-active');
+        });
+        modalClose.addEventListener('click', () => {
+            modal.classList.remove('is-active');
+        });
+
+        publishBtn.addEventListener('click', () => {
+            modal.classList.remove('is-active');
+            publishSurvey();
+        });
+
+        function publishSurvey() {
+            survey.title = document.getElementById('surveyTitle').value;
+            survey.options = [];
+            var opt1 = document.getElementById('option1').value;
+            var opt2 = document.getElementById('option2').value;
+            var opt3 = document.getElementById('option3').value;
+
+            if (opt1) {
+                survey.options.push({value: opt1, votes: 0});
+            }
+
+            if (opt2) {
+                survey.options.push({value: opt2, votes: 0});
+            }
+
+            if (opt3) {
+                survey.options.push({value: opt3, votes: 0});
+            }
+
+            ws.send('survey:' + JSON.stringify(survey));
+            displaySurvey();
+        }
+
+        function displaySurvey() {
+            var surveySection = document.querySelector('.survey-result');
+            var surveyTitle = document.querySelector('.survey-title');
+            var surveyOptions = document.querySelector('.survey-result .options');
+            surveySection.classList.remove('is-hidden');
+            surveyTitle.textContent = survey.title;
+            surveyOptions.innerHTML = '';
+
+            survey.options.forEach((option) => {
+                var node = document.createElement('div');
+                node.innerHTML = `${option.value} votes: <span id="vote-${option.value}">${option.votes}</span>`;
+                surveyOptions.appendChild(node);
+            });
+        }
+
+        function countVote(voteIndex) {
+            var option = survey.options[voteIndex];
+            var el = document.getElementById(`vote-${option.value}`);
+            option.votes++;
+            el.textContent = option.votes;
+        }
+
+    </script>
+</body>
+</html>
