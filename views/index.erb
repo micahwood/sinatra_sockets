@@ -34,7 +34,7 @@
         var surveyTitle = document.querySelector('.survey-title');
         var surveyOptions = document.querySelector('.survey-options');
 
-        var ws = new WebSocket('ws://' + window.location.host + window.location.pathname + 'student-socket');
+        var ws = new WebSocket('wss://' + window.location.host + window.location.pathname + 'student-socket');
         ws.onopen = () => { console.log('socket opened') };
         ws.onclose = () => { console.log('socket closed') };
         ws.onmessage = (msg) => {

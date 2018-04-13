@@ -95,7 +95,7 @@
             options: [],
         };
 
-        var ws = new WebSocket('ws://' + window.location.host + window.location.pathname + '-socket');
+        var ws = new WebSocket('wss://' + window.location.host + window.location.pathname + '-socket');
         var questionId = 1;
         ws.onopen = () => { console.log('socket opened') };
         ws.onclose = () => { console.log('socket closed') };
