@@ -2,6 +2,7 @@ require 'sinatra'
 require 'sinatra-websocket'
 
 # set :bind, '0.0.0.0'
+set :server, 'thin'
 set :admin_sockets, []
 set :student_sockets, []
 

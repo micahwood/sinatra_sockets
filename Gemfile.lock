@@ -7,7 +7,7 @@ GEM
     em-websocket (0.3.8)
       addressable (>= 2.1.1)
       eventmachine (>= 0.12.9)
-    eventmachine (1.2.5-x64-mingw32)
+    eventmachine (1.2.5)
     mustermann (1.0.2)
     public_suffix (3.0.2)
     rack (2.0.4)
@@ -29,11 +29,11 @@ GEM
     tilt (2.0.8)
 
 PLATFORMS
-  x64-mingw32
+  ruby
 
 DEPENDENCIES
   sinatra
   sinatra-websocket
 
 BUNDLED WITH
-   1.16.1
+   1.13.7
