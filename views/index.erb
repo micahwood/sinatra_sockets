@@ -36,7 +36,10 @@
 
         var ws = new WebSocket('wss://' + window.location.host + window.location.pathname + 'student-socket');
         ws.onopen = () => { console.log('socket opened') };
-        ws.onclose = () => { console.log('socket closed') };
+        ws.onclose = () => {
+            console.log('socket closed');
+            ws = new WebSocket('ws://' + window.location.host + window.location.pathname + 'student-socket');
+        };
         ws.onmessage = (msg) => {
             console.log(msg);
             if (msg.data.includes('survey:')) {
