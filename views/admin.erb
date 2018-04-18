@@ -95,23 +95,27 @@
             options: [],
         };
 
-        var ws = new WebSocket('wss://' + window.location.host + window.location.pathname + '-socket');
-        var questionId = 1;
-        ws.onopen = () => { console.log('socket opened') };
-        ws.onclose = () => {
-            console.log('socket closed');
-            ws = new WebSocket('wss://' + window.location.host + window.location.pathname + '-socket');
-        };
-        ws.onmessage = (msg) => {
-            console.log(msg);
-            if (msg.data.includes('question:')) {
-                addQuestion(msg.data.substring(9));
-            }
-            if (msg.data.includes('vote:')) {
-                countVote(msg.data.substring(5));
-            }
+        function openSocket() {
+            var ws = new WebSocket('wss://' + window.location.host + window.location.pathname + '-socket');
+            ws.onopen = () => { console.log('socket opened') };
+            ws.onclose = () => {
+                console.log('socket closed');
+                openSocket();
+            };
+            ws.onmessage = (msg) => {
+                console.log(msg);
+                if (msg.data.includes('question:')) {
+                    addQuestion(msg.data.substring(9));
+                }
+                if (msg.data.includes('vote:')) {
+                    countVote(msg.data.substring(5));
+                }
 
+            }
         }
+
+        var questionId = 1;
+        openSocket();
 
         function addQuestion(msg) {
             var node = document.createElement('div');

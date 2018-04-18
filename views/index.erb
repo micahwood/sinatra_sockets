@@ -34,18 +34,22 @@
         var surveyTitle = document.querySelector('.survey-title');
         var surveyOptions = document.querySelector('.survey-options');
 
-        var ws = new WebSocket('wss://' + window.location.host + window.location.pathname + 'student-socket');
-        ws.onopen = () => { console.log('socket opened') };
-        ws.onclose = () => {
-            console.log('socket closed');
-            ws = new WebSocket('wss://' + window.location.host + window.location.pathname + 'student-socket');
-        };
-        ws.onmessage = (msg) => {
-            console.log(msg);
-            if (msg.data.includes('survey:')) {
-                addSurvey(JSON.parse(msg.data.substring(7)));
+        function openSocket() {
+            var ws = new WebSocket('wss://' + window.location.host + window.location.pathname + 'student-socket');
+            ws.onopen = () => { console.log('socket opened') };
+            ws.onclose = () => {
+                console.log('socket closed');
+                openSocket();
+            };
+            ws.onmessage = (msg) => {
+                console.log(msg);
+                if (msg.data.includes('survey:')) {
+                    addSurvey(JSON.parse(msg.data.substring(7)));
+                }
             }
+
         }
+        openSocket();
 
         function addSurvey(survey) {
             surveyContainer.classList.remove('is-hidden');
