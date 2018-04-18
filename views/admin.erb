@@ -94,9 +94,10 @@
             title: '',
             options: [],
         };
+        var ws;
 
         function openSocket() {
-            var ws = new WebSocket('wss://' + window.location.host + window.location.pathname + '-socket');
+            ws = new WebSocket('wss://' + window.location.host + window.location.pathname + '-socket');
             ws.onopen = () => { console.log('socket opened') };
             ws.onclose = () => {
                 console.log('socket closed');
